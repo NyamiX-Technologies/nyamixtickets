@@ -4,7 +4,6 @@ export interface User {
   id: string;
   email: string;
   username: string;
-  avatar?: string;
 }
 
 export interface LoginData {
@@ -55,7 +54,7 @@ export const authService = {
     return !!localStorage.getItem('auth_token');
   },
 
-  async getCurrentUser(): User | null {
+  async getCurrentUser(): Promise<User> {
     const userStr = localStorage.getItem('user');
     if (!userStr) return null;
     

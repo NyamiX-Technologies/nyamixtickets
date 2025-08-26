@@ -101,7 +101,7 @@ export function Header() {
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
                   <Avatar className="h-9 w-9 border border-gray-200">
                     <AvatarImage 
-                      src={currentUser?.avatar || defaultAvatarUrl} 
+                      src={defaultAvatarUrl} 
                       alt={currentUser?.username || 'User'} 
                     />
                     <AvatarFallback className="bg-gray-100 text-gray-700">

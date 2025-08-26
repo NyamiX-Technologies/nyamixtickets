@@ -7,9 +7,17 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { CalendarDays, MapPin, Users, Clock, X, Minus, Plus, ShoppingCart, CreditCard, Smartphone, Star, AlertCircle, CheckCircle2, Ticket } from 'lucide-react';
+import { CalendarDays, MapPin, Users, Clock, X, Minus, Plus, ShoppingCart, CreditCard, Smartphone, Star, AlertCircle, CheckCircle2, Ticket, Info } from 'lucide-react';
 import { IMAGE_BASE_URL } from '@/lib/api';
 import { Event, TicketType, Category } from '@/lib/events';
+import { eventService } from '@/lib/events'; // Import eventService
+
+interface EventDetailsModalProps {
+  event: Event;
+  open: boolean;
+  onClose: () => void;
+  onTicketPurchased?: (ticketTypeId: string, quantity: number, phone: string) => Promise<void>;
+}
 
 // Circular Progress Component for Ticket Availability
 const CircularProgress = ({ value, max, size = 40, strokeWidth = 4 }) => {
@@ -159,13 +167,26 @@ export function EventDetailsModal({ event, open, onClose, onTicketPurchased }: E
     setIsLoading(true);
     
     try {
-      // Mock purchase logic - replace with your actual API calls
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // First purchase the ticket
+      const ticketResult = await eventService.purchaseTicket(
+        selectedTicketType.id.toString(),
+        quantity
+      );
+      
+      // Then request mobile money payment
+      const paymentResult = await eventService.requestMobileMoneyPayment({
+        phone: phone,
+        amount: ticketResult.total_price,
+        ticketId: ticketResult.id
+      });
       
       // Show success message
-      alert(`Payment initiated for ZMW${eventDetails.totalPrice.toFixed(2)} to ${phone}`);
+      alert(`Payment initiated for ZMW${ticketResult.total_price.toFixed(2)} to ${phone}`);
       
-      onTicketPurchased();
+      if (onTicketPurchased) {
+        await onTicketPurchased(selectedTicketType.id.toString(), quantity, phone);
+      }
+      
       onClose();
       
     } catch (error) {
@@ -453,10 +474,14 @@ export function EventDetailsModal({ event, open, onClose, onTicketPurchased }: E
                                 <Smartphone className="h-5 w-5" />
                                 Phone Number (Mobile Money) *
                               </Label>
+                              <div className="text-sm text-muted-foreground mb-2 flex items-center gap-2 bg-muted/30 px-3 py-2 rounded-lg">
+                                <Info className="h-4 w-4 text-primary" />
+                                Only Airtel Money and MTN Mobile Money are currently supported
+                              </div>
                               <Input
                                 id="phone"
                                 type="tel"
-                                placeholder="e.g., +260971234567 or 0971234567"
+                                placeholder="e.g., 0961234567 (MTN) or 0971234567 (Airtel)"
                                 value={phone}
                                 onChange={(e) => handlePhoneChange(e.target.value)}
                                 className={`h-14 text-base rounded-xl border-2 transition-all duration-200 ${errors.phone ? 'border-destructive focus-visible:ring-destructive' : 'border-border/50 focus-visible:border-primary'}`}
@@ -519,14 +544,14 @@ export function EventDetailsModal({ event, open, onClose, onTicketPurchased }: E
                             className="w-full mt-8 h-16 text-xl font-bold rounded-2xl bg-gradient-to-r from-primary via-primary to-primary/80 hover:from-primary/90 hover:via-primary/90 hover:to-primary/70 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
                           >
                             {isLoading ? (
-                              <div className="flex items-center justify-center gap-4">
-                                <div className="animate-spin rounded-full h-6 w-6 border-3 border-current border-t-transparent" />
-                                Processing Payment...
+                              <div className="flex items-center gap-2">
+                                <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                Processing...
                               </div>
                             ) : (
                               <div className="flex items-center justify-center gap-3">
                                 <Smartphone className="h-6 w-6" />
-                                Pay K{eventDetails.totalPrice.toFixed(2)} via Mobile Money
+                                Pay K{eventDetails.totalPrice.toFixed(2)} (Airtel/MTN Mobile Money)
                                 <Star className="h-5 w-5 ml-2 animate-pulse" />
                               </div>
                             )}

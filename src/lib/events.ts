@@ -82,7 +82,13 @@ export const eventService = {
     return apiClient.get<Event[]>(`/events/categories/${categoryId}/events/`);
   },
 
-  async purchaseTicket(data: PurchaseTicketData): Promise<{ id: string; total_price: number }> {
+  async purchaseTicket(ticketTypeId: string, quantity: number,): Promise<{ id: string; total_price: number }> {
+    const data = {
+      ticket_type_id: ticketTypeId,
+      quantity: quantity,
+      payment_method: 'mobile_money',
+    
+    };
     return apiClient.post<{ id: string; total_price: number }>('/events/tickets/', data);
   },
 
