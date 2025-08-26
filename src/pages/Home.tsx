@@ -1,16 +1,12 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { EventCard } from '@/components/EventCard';
 import { EventDetailsModal } from '@/components/EventDetailsModal';
 import { FloatingTicketCounter } from '@/components/FloatingTicketCounter';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { CalendarDays, MapPin, Sparkles, TrendingUp } from 'lucide-react';
-import { Event, Category, eventService } from '@/lib/events';
+import { Event, Category, eventService, Ticket } from '@/lib/events';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { Ticket as TicketIcon, Sparkles, Calendar, Zap } from 'lucide-react';
 
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -18,59 +14,68 @@ export default function Home() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [ticketCount, setTicketCount] = useState(0);
-  const [isLoadingEvents, setIsLoadingEvents] = useState(true);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [userTickets, setUserTickets] = useState<Ticket[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [ticketsLoading, setTicketsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadInitialData();
+    loadData();
+    loadUserTickets();
   }, []);
 
-  const loadInitialData = async () => {
+  const loadData = async () => {
     try {
       const [eventsData, categoriesData] = await Promise.all([
         eventService.getHomeEvents(),
         eventService.getCategories()
       ]);
-      
       setEvents(eventsData);
       setCategories(categoriesData);
     } catch (error) {
-      console.error('Failed to load data:', error);
       toast({
         title: "Failed to load events",
-        description: "Please refresh the page to try again",
         variant: "destructive",
       });
     } finally {
-      setIsLoadingEvents(false);
-      setIsLoadingCategories(false);
+      setLoading(false);
+    }
+  };
+
+  const loadUserTickets = async () => {
+    setTicketsLoading(true);
+    try {
+      const tickets = await eventService.getUserTickets();
+      setUserTickets(tickets);
+      setTicketCount(tickets.length);
+    } catch (error) {
+      console.error('Failed to load user tickets:', error);
+    } finally {
+      setTicketsLoading(false);
     }
   };
 
   const loadCategoryEvents = async (categoryId: string) => {
-    setIsLoadingEvents(true);
+    setLoading(true);
     setSelectedCategory(categoryId);
     
     try {
       const categoryEvents = await eventService.getEventsByCategory(categoryId);
       setEvents(categoryEvents);
     } catch (error) {
-      console.error('Failed to load category events:', error);
       toast({
         title: "Failed to load category events",
-        description: "Please try again",
         variant: "destructive",
       });
     } finally {
-      setIsLoadingEvents(false);
+      setLoading(false);
     }
   };
 
   const handleShowAllEvents = async () => {
     setSelectedCategory(null);
-    setIsLoadingEvents(true);
+    setLoading(true);
     
     try {
       const allEvents = await eventService.getHomeEvents();
@@ -78,7 +83,7 @@ export default function Home() {
     } catch (error) {
       console.error('Failed to load all events:', error);
     } finally {
-      setIsLoadingEvents(false);
+      setLoading(false);
     }
   };
 
@@ -88,164 +93,176 @@ export default function Home() {
 
   const handleTicketPurchased = () => {
     setTicketCount(prev => prev + 1);
+    // Refresh user tickets after purchase
+    loadUserTickets();
   };
 
-  const handleTicketCounterClick = () => {
+  const handleTicketsNavigation = () => {
     navigate('/tickets');
   };
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="nyamix-hero-gradient py-20 px-4">
-        <div className="container mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-              Discover Amazing
-              <span className="block nyamix-gradient-overlay bg-clip-text text-transparent">
-                Events
-              </span>
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Book tickets for concerts, festivals, conferences, and more. 
-              Experience unforgettable moments with NyamiX.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center items-center">
-              <Button size="lg" className="nyamix-button-primary">
-                <Sparkles className="mr-2 h-5 w-5" />
-                Browse Events
-              </Button>
-              <Button variant="outline" size="lg">
-                <TrendingUp className="mr-2 h-5 w-5" />
-                Trending Now
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Categories Section */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <h2 className="text-3xl font-bold text-center mb-8">Browse by Category</h2>
-            
-            {isLoadingCategories ? (
-              <div className="flex gap-4 overflow-x-auto pb-4">
-                {[...Array(6)].map((_, i) => (
-                  <Skeleton key={i} className="h-12 w-32 rounded-full flex-shrink-0" />
-                ))}
-              </div>
-            ) : (
-              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                <Button
-                  variant={selectedCategory === null ? "default" : "outline"}
-                  className={selectedCategory === null ? "nyamix-button-primary" : ""}
-                  onClick={handleShowAllEvents}
-                >
-                  All Events
-                </Button>
-                {categories.map((category) => (
-                  <Button
-                    key={category.id}
-                    variant={selectedCategory === category.id ? "default" : "outline"}
-                    className={selectedCategory === category.id ? "nyamix-button-primary" : ""}
-                    onClick={() => loadCategoryEvents(category.id)}
-                  >
-                    {category.name}
-                  </Button>
-                ))}
-              </div>
-            )}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Events Grid */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold">
-              {selectedCategory 
-                ? categories.find(c => c.id === selectedCategory)?.name || 'Category Events'
-                : 'Featured Events'
-              }
-            </h2>
-            <Badge variant="outline" className="text-sm">
-              {events.length} {events.length === 1 ? 'event' : 'events'} found
-            </Badge>
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-lime-50 via-yellow-50 to-amber-50">
+        <div className="text-center">
+          <div className="relative">
+            {/* Outer spinning ring */}
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-lime-500 border-r-yellow-500 mx-auto mb-6 drop-shadow-lg"></div>
+            {/* Inner counter-spinning ring */}
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 animate-spin rounded-full h-16 w-16 border-4 border-transparent border-b-amber-500 border-l-lime-600" style={{ animationDirection: 'reverse', animationDuration: '2s' }}></div>
+            {/* Center dot */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-6 w-4 h-4 bg-gradient-to-r from-lime-500 to-yellow-500 rounded-full animate-pulse"></div>
           </div>
-
-          {isLoadingEvents ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[...Array(8)].map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <Skeleton className="h-48 w-full" />
-                  <div className="p-6 space-y-3">
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-2/3" />
-                    <Skeleton className="h-10 w-full" />
-                  </div>
-                </Card>
-              ))}
+          <div className="space-y-2">
+            <p className="text-black font-bold text-lg">Loading Events</p>
+            <div className="flex items-center justify-center space-x-1">
+              <div className="w-2 h-2 bg-lime-500 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
             </div>
-          ) : events.length > 0 ? (
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-lime-50 via-yellow-50/30 to-amber-50">
+      <div className="p-6">
+        {/* Animated Header */}
+        <div className="max-w-6xl mx-auto mb-12">
+          <div className="text-center space-y-6">
+            <div className="relative">
+              <h1 className="text-6xl md:text-7xl font-black mb-4 bg-gradient-to-r from-lime-600 via-yellow-500 to-amber-600 bg-clip-text text-transparent animate-in slide-in-from-top duration-1000">
+                Discover Events
+              </h1>
+              {/* Floating sparkles */}
+              <div className="absolute -top-4 left-1/4 animate-bounce">
+                <Sparkles className="w-6 h-6 text-yellow-500 animate-pulse" />
+              </div>
+              <div className="absolute top-0 right-1/3 animate-bounce" style={{ animationDelay: '0.5s' }}>
+                <Zap className="w-5 h-5 text-lime-500 animate-pulse" />
+              </div>
+            </div>
+            <p className="text-black font-medium text-xl animate-in slide-in-from-bottom duration-1000 delay-300">
+              Find and book the most amazing experiences
+            </p>
+            
+            {/* Animated stats */}
+            <div className="flex justify-center items-center space-x-8 animate-in fade-in duration-1000 delay-500">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-lime-600 animate-pulse">{events.length}</div>
+                <div className="text-sm text-black/70">Events</div>
+              </div>
+              <div className="w-px h-12 bg-gradient-to-b from-transparent via-lime-300 to-transparent"></div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-yellow-600 animate-pulse">{categories.length}</div>
+                <div className="text-sm text-black/70">Categories</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Enhanced Categories */}
+        <div className="max-w-6xl mx-auto mb-10">
+          <div className="flex gap-3 flex-wrap justify-center animate-in slide-in-from-left duration-1000 delay-700">
+            <Button
+              variant={selectedCategory === null ? "default" : "outline"}
+              size="lg"
+              onClick={handleShowAllEvents}
+              className={`group relative overflow-hidden rounded-[50px] px-8 py-4 font-semibold transition-all duration-500 ${
+                selectedCategory === null 
+                  ? "bg-gradient-to-r from-lime-500 via-yellow-500 to-amber-500 hover:from-lime-600 hover:via-yellow-600 hover:to-amber-600 text-black shadow-xl shadow-lime-200 scale-105" 
+                  : "hover:bg-lime-50 border-lime-300 text-black hover:border-lime-400 hover:shadow-lg hover:shadow-lime-100"
+              }`}
             >
+              <div className="absolute inset-0 bg-gradient-to-r from-lime-600 to-yellow-600 opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div>
+              <Sparkles className="w-5 h-5 mr-3 group-hover:animate-spin" />
+              <span className="relative z-10">All Events</span>
+              {selectedCategory === null && (
+                <div className="absolute inset-0 bg-white/20 animate-pulse rounded-2xl"></div>
+              )}
+            </Button>
+            
+            {categories.map((category, index) => (
+              <Button
+                key={category.id}
+                variant={selectedCategory === category.id ? "default" : "outline"}
+                size="lg"
+                onClick={() => loadCategoryEvents(category.id)}
+                className={`group relative overflow-hidden rounded-[50px] px-8 py-4 font-semibold transition-all duration-500 animate-in slide-in-from-right ${
+                  selectedCategory === category.id
+                    ? "bg-gradient-to-r from-lime-500 via-yellow-500 to-amber-500 hover:from-lime-600 hover:via-yellow-600 hover:to-amber-600 text-black shadow-xl shadow-lime-200 scale-105"
+                    : "hover:bg-lime-50 border-lime-300 text-black hover:border-lime-400 hover:shadow-lg hover:shadow-lime-100"
+                }`}
+                style={{ animationDelay: `${(index + 1) * 100}ms` }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-lime-600 to-yellow-600 opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div>
+                <span className="relative z-10">{category.name}</span>
+                {selectedCategory === category.id && (
+                  <div className="absolute inset-0 bg-white/20 animate-pulse rounded-2xl"></div>
+                )}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        {/* Events Grid with Stagger Animation */}
+        <div className="max-w-6xl mx-auto pb-24">
+          {events.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {events.map((event, index) => (
-                <motion.div
+                <div
                   key={event.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 * index }}
+                  className="group transform hover:scale-110 transition-all duration-500 hover:z-10 relative animate-in fade-in slide-in-from-bottom"
+                  style={{ 
+                    animationDelay: `${index * 100}ms`,
+                    animationDuration: '800ms'
+                  }}
                 >
+                  <div className="absolute inset-0 bg-gradient-to-br from-lime-400/20 to-yellow-400/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl transform scale-110"></div>
                   <EventCard
                     event={event}
                     onClick={handleEventClick}
                   />
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
+            </div>
           ) : (
-            <motion.div 
-              className="text-center py-16"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <div className="max-w-md mx-auto">
-                <CalendarDays className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">No events found</h3>
-                <p className="text-muted-foreground mb-6">
-                  {selectedCategory 
-                    ? "No events available in this category at the moment."
-                    : "No events available at the moment. Check back soon!"
-                  }
-                </p>
-                {selectedCategory && (
-                  <Button onClick={handleShowAllEvents} variant="outline">
-                    View All Events
-                  </Button>
-                )}
+            <div className="text-center py-20 animate-in fade-in duration-1000">
+              <div className="relative bg-white/60 backdrop-blur-xl rounded-3xl p-16 border border-white/40 shadow-2xl shadow-lime-100/50 max-w-lg mx-auto">
+                {/* Floating background elements */}
+                <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-br from-lime-200/30 to-yellow-200/30 rounded-full animate-pulse"></div>
+                <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-br from-yellow-200/30 to-amber-200/30 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+                
+                <div className="relative z-10">
+                  <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-lime-100 to-yellow-100 rounded-full flex items-center justify-center animate-bounce">
+                    <Calendar className="w-16 h-16 text-lime-600" />
+                  </div>
+                  <h3 className="text-3xl font-bold mb-4 text-black">No Events Found</h3>
+                  <p className="text-black/70 text-lg mb-8 leading-relaxed">
+                    {selectedCategory 
+                      ? "No events available in this category" 
+                      : "No events are currently available"
+                    }
+                  </p>
+                  {selectedCategory && (
+                    <Button 
+                      onClick={handleShowAllEvents} 
+                      className="rounded-full px-10 py-4 bg-gradient-to-r from-lime-500 to-yellow-500 hover:from-lime-600 hover:to-yellow-600 text-black font-semibold shadow-lg shadow-lime-200 hover:shadow-xl hover:shadow-lime-300 transition-all duration-500"
+                    >
+                      <Sparkles className="w-5 h-5 mr-3" />
+                      View All Events
+                    </Button>
+                  )}
+                </div>
               </div>
-            </motion.div>
+            </div>
           )}
         </div>
-      </section>
+      </div>
 
-      {/* Event Details Modal */}
+      {/* Modals */}
       <EventDetailsModal
         event={selectedEvent}
         open={!!selectedEvent}
@@ -253,11 +270,21 @@ export default function Home() {
         onTicketPurchased={handleTicketPurchased}
       />
 
-      {/* Floating Ticket Counter */}
       <FloatingTicketCounter
         ticketCount={ticketCount}
-        onClick={handleTicketCounterClick}
+        onClick={() => navigate('/tickets')}
       />
+
+      {/* Premium Glass UI Floating Tickets Button */}
+      <div className="fixed bottom-8 right-8 z-50 animate-in slide-in-from-bottom duration-1000 delay-1000">
+        
+        
+        {/* Enhanced Tooltip */}
+        
+        
+        {/* Glow effect */}
+        <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-lime-500 to-yellow-500 opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-xl scale-110 -z-10"></div>
+      </div>
     </div>
   );
 }

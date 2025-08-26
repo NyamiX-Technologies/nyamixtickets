@@ -1,44 +1,60 @@
 import { apiClient } from './api';
 
 export interface Event {
-  id: string;
+  id: number;
   title: string;
   description: string;
   short_description?: string;
   location: string;
   date: string;
   image: string;
+  phone_number: string;
+  ticket_type: string;
   ticket_types: TicketType[];
   category: Category;
-  price_range?: {
-    min: number;
-    max: number;
-  };
+  age_restriction: number;
+  price_range: string;
 }
 
 export interface TicketType {
-  id: string;
+  id: number;
   name: string;
-  price: number;
-  available_quantity: number;
+  price: string;
+  quantity_available: number;
+  event: number;
 }
 
 export interface Category {
-  id: string;
+  id: number;
   name: string;
   description?: string;
 }
 
 export interface Ticket {
-  id: string;
-  event: Event;
-  ticket_type: TicketType;
+  id: number;
+  barcode_token: string;
+  ticket_number: string;
+  payment_method: 'mobile_money' | 'credit_card' | string; 
   quantity: number;
+  status: 'pending' | 'confirmed' | 'cancelled' | string;
+  barcode_image: string;
+  secret_code: string;
+  issued_at: string; 
+  event_title: string;
+  event_contact: string;
+  ticket_type_name: string;
+  ticket_price: string; 
   total_price: number;
-  status: string;
-  payment_status: 'pending' | 'successful' | 'failed';
-  barcode_image?: string;
-  purchase_date: string;
+  payment_status: 'pending' | 'successful' | 'failed' | 'Payment not processed' | string;
+  event_image: string;
+  event_date: string;
+  event_description: string;
+  event_location: string;
+  customer_first_name: string;
+  customer_last_name: string;
+  customer_phone: string;
+  customer_email: string;
+  customer_avatar: string;
 }
 
 export interface PurchaseTicketData {

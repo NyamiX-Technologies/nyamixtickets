@@ -2,6 +2,7 @@ const API_BASE_URL = 'https://nyamix.up.railway.app/api/v1.0';
 const IMAGE_BASE_URL = 'https://res.cloudinary.com/dqlnpyxr4/';
 const API_VERSION = '?version=v1';
 
+
 interface ApiError {
   message: string;
   status?: number;
@@ -28,11 +29,11 @@ class ApiClient {
     const token = this.getAuthToken();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
     };
     
     if (token) {
-      // No Bearer prefix as per requirements
-      headers.Authorization = token;
+      headers.Authorization = `Token ${token}`;
     }
     
     return headers;

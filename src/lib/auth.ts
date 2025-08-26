@@ -4,6 +4,7 @@ export interface User {
   id: string;
   email: string;
   username: string;
+  avatar?: string;
 }
 
 export interface LoginData {
@@ -54,7 +55,7 @@ export const authService = {
     return !!localStorage.getItem('auth_token');
   },
 
-  getCurrentUser(): User | null {
+  async getCurrentUser(): User | null {
     const userStr = localStorage.getItem('user');
     if (!userStr) return null;
     
@@ -63,5 +64,9 @@ export const authService = {
     } catch {
       return null;
     }
+  },
+
+  async getMe(): Promise<User> {
+    return apiClient.get<User>(`/auth/users/me/${API_VERSION}`);
   }
 };

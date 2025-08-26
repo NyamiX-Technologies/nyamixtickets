@@ -155,4 +155,23 @@ All colors MUST be HSL format for consistency
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary));
+    border-radius: 10px;
+    border: 2px solid hsl(var(--muted));
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary)/0.8);
+  }
 }
