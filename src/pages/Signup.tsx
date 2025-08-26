@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
 import { authService } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
-import nyamixLogo from '@/assets/nyamix-logo.png';
+import nyamixLogo from '@/assets/nyamix.jpg';
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -20,12 +20,14 @@ export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const validateForm = () => {
-    if (!formData.email.trim() || !formData.username.trim() || !formData.password.trim()) {
+    const { email, username, password, confirmPassword } = formData;
+
+    if (!email.trim() || !username.trim() || !password.trim()) {
       toast({
         title: "Missing information",
         description: "Please fill in all fields",
@@ -34,7 +36,7 @@ export default function Signup() {
       return false;
     }
 
-    if (!formData.email.includes('@')) {
+    if (!email.includes('@')) {
       toast({
         title: "Invalid email",
         description: "Please enter a valid email address",
@@ -43,7 +45,7 @@ export default function Signup() {
       return false;
     }
 
-    if (formData.password.length < 6) {
+    if (password.length < 6) {
       toast({
         title: "Password too short",
         description: "Password must be at least 6 characters long",
@@ -52,7 +54,7 @@ export default function Signup() {
       return false;
     }
 
-    if (formData.password !== formData.confirmPassword) {
+    if (password !== confirmPassword) {
       toast({
         title: "Passwords don't match",
         description: "Please make sure both passwords match",
@@ -66,29 +68,28 @@ export default function Signup() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
 
     setIsLoading(true);
-    
+
     try {
       await authService.signup({
         email: formData.email.trim(),
         username: formData.username.trim(),
         password: formData.password
       });
-      
+
       toast({
         title: "Account created successfully!",
         description: "Please log in with your new account",
       });
-      
+
       navigate('/login');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Signup failed:', error);
       toast({
         title: "Signup failed",
-        description: error instanceof Error ? error.message : "Please try again",
+        description: error?.message || "Please try again",
         variant: "destructive",
       });
     } finally {
@@ -101,23 +102,26 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen nyamix-hero-gradient flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-mellow-lime/50 via-gray-100/20 to-white">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <Card className="nyamix-card p-8">
+        <Card className="p-8 rounded-[16px] shadow-lg bg-white/90 backdrop-blur-md">
           {/* Logo and Title */}
           <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
-              <img 
-                src={nyamixLogo} 
-                alt="NyamiX Logo" 
-                className="h-16 w-16 object-contain"
+            <Link
+              to="/"
+              className="flex items-center justify-center mb-4 transform hover:scale-105 transition-all duration-300"
+            >
+              <img
+                src={nyamixLogo}
+                alt="NyamiX Logo"
+                className="w-20 h-20 object-contain"
               />
-            </div>
+            </Link>
             <h1 className="text-3xl font-bold text-foreground">Join NyamiX</h1>
             <p className="text-muted-foreground mt-2">
               Create your account to start booking tickets
@@ -126,94 +130,58 @@ export default function Signup() {
 
           {/* Signup Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                disabled={isLoading}
-                className="w-full"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="Choose a username"
-                value={formData.username}
-                onChange={(e) => handleInputChange('username', e.target.value)}
-                disabled={isLoading}
-                className="w-full"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
+            {['email', 'username'].map((field) => (
+              <div className="space-y-2" key={field}>
+                <Label htmlFor={field}>{field.charAt(0).toUpperCase() + field.slice(1)}</Label>
                 <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Create a password"
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  id={field}
+                  type={field === 'email' ? 'email' : 'text'}
+                  placeholder={`Enter your ${field}`}
+                  value={(formData as any)[field]}
+                  onChange={(e) => handleInputChange(field, e.target.value)}
                   disabled={isLoading}
-                  className="w-full pr-12"
+                  className="w-full border border-gray-300 rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
                 />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={isLoading}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
               </div>
-            </div>
+            ))}
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="Confirm your password"
-                  value={formData.confirmPassword}
-                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                  disabled={isLoading}
-                  className="w-full pr-12"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  disabled={isLoading}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
+            {['password', 'confirmPassword'].map((field) => {
+              const show = field === 'password' ? showPassword : showConfirmPassword;
+              const toggle = field === 'password' ? setShowPassword : setShowConfirmPassword;
+              const placeholder = field === 'password' ? 'Create a password' : 'Confirm your password';
+
+              return (
+                <div className="space-y-2" key={field}>
+                  <Label htmlFor={field}>{field === 'password' ? 'Password' : 'Confirm Password'}</Label>
+                  <div className="relative">
+                    <Input
+                      id={field}
+                      type={show ? 'text' : 'password'}
+                      placeholder={placeholder}
+                      value={(formData as any)[field]}
+                      onChange={(e) => handleInputChange(field, e.target.value)}
+                      disabled={isLoading}
+                      className="w-full pr-12 border border-gray-300 rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
+                      onClick={() => toggle(!show)}
+                      disabled={isLoading}
+                    >
+                      {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
 
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full nyamix-button-primary"
+              className="w-full nyamix-button-primary flex justify-center items-center gap-2 hover:bg-primary/90 transition-all rounded-[56px]"
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
@@ -221,10 +189,10 @@ export default function Signup() {
                   Creating account...
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <>
                   <UserPlus className="h-4 w-4" />
                   Create Account
-                </div>
+                </>
               )}
             </Button>
           </form>

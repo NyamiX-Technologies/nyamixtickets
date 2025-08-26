@@ -8,23 +8,23 @@ import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { authService } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
-import nyamixLogo from '@/assets/nyamix-logo.png';
+import nyamixLogo from '@/assets/nyamix.jpg';
 
 export default function Login() {
-  const [formData, setFormData] = useState({
-    username: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ username: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.username.trim() || !formData.password.trim()) {
+
+    const username = formData.username.trim();
+    const password = formData.password.trim();
+
+    if (!username || !password) {
       toast({
         title: "Missing information",
         description: "Please fill in all fields",
@@ -34,21 +34,21 @@ export default function Login() {
     }
 
     setIsLoading(true);
-    
+
     try {
-      await authService.login(formData);
-      
+      await authService.login({ username, password });
+
       toast({
         title: "Welcome back!",
         description: "You've been logged in successfully",
       });
-      
+
       navigate('/');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login failed:', error);
       toast({
         title: "Login failed",
-        description: error instanceof Error ? error.message : "Please check your credentials",
+        description: error?.message || "Please check your credentials",
         variant: "destructive",
       });
     } finally {
@@ -61,23 +61,26 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen nyamix-hero-gradient flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-mellow-lime/50 via-gray-100/20 to-white">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <Card className="nyamix-card p-8">
+        <Card className="p-8 rounded-[5px] shadow-lg bg-white/90 backdrop-blur-md">
           {/* Logo and Title */}
           <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
-              <img 
-                src={nyamixLogo} 
-                alt="NyamiX Logo" 
-                className="h-16 w-16 object-contain"
+            <Link
+              to="/"
+              className="flex items-center justify-center mb-4 transform hover:scale-105 transition-all duration-300"
+            >
+              <img
+                src={nyamixLogo}
+                alt="NyamiX Logo"
+                className="w-20 h-20 object-contain"
               />
-            </div>
+            </Link>
             <h1 className="text-3xl font-bold text-foreground">Welcome Back</h1>
             <p className="text-muted-foreground mt-2">
               Sign in to your NyamiX account
@@ -89,28 +92,31 @@ export default function Login() {
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
               <Input
-                id="username"
-                type="text"
-                placeholder="Enter your username"
-                value={formData.username}
-                onChange={(e) => handleInputChange('username', e.target.value)}
-                disabled={isLoading}
-                className="w-full"
-              />
+  id="username"
+  type="text"
+  placeholder="Enter your username"
+  value={formData.username}
+  onChange={(e) => handleInputChange('username', e.target.value)}
+  disabled={isLoading}
+  className="w-full border border-gray-300 rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
+/>
+
+
+
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  disabled={isLoading}
-                  className="w-full pr-12"
-                />
+              <Input
+  id="password"
+  type={showPassword ? 'text' : 'password'}
+  placeholder="Enter your password"
+  value={formData.password}
+  onChange={(e) => handleInputChange('password', e.target.value)}
+  disabled={isLoading}
+  className="w-full pr-12 border border-gray-300 rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
+/>
                 <Button
                   type="button"
                   variant="ghost"
@@ -119,19 +125,21 @@ export default function Login() {
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={isLoading}
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
+            </div>
+
+            <div className="flex justify-end">
+              <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                Forgot password?
+              </Link>
             </div>
 
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full nyamix-button-primary"
+              className="w-full nyamix-button-primary flex justify-center items-center gap-2 hover:bg-primary/90 transition-all rounded-[56px]"
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
@@ -139,10 +147,10 @@ export default function Login() {
                   Signing in...
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <>
                   <LogIn className="h-4 w-4" />
                   Sign In
-                </div>
+                </>
               )}
             </Button>
           </form>
@@ -151,10 +159,7 @@ export default function Login() {
           <div className="text-center mt-6">
             <p className="text-muted-foreground">
               Don't have an account?{' '}
-              <Link 
-                to="/signup" 
-                className="text-primary hover:underline font-medium"
-              >
+              <Link to="/signup" className="text-primary hover:underline font-medium">
                 Sign up here
               </Link>
             </p>

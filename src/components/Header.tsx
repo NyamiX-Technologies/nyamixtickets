@@ -14,6 +14,7 @@ export function Header() {
   const { toast } = useToast();
   const isAuthenticated = authService.isAuthenticated();
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const defaultAvatarUrl = 'https://firebasestorage.googleapis.com/v0/b/authenification-b4dc9.appspot.com/o/uploads%2Favatar.png?alt=media&token=7da81de9-a163-4296-86ac-3194c490ce15';
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -53,26 +54,29 @@ export function Header() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 80 }}
-      className="sticky top-0 z-40 w-full border-b border-border/50 bg-background/70 backdrop-blur-md shadow-sm"
+      className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white/90 backdrop-blur-sm shadow-sm"
     >
-      <div className="container mx-auto flex h-20 items-center justify-between px-4">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
         
         {/* Logo Section */}
-        <Link to="/" className="flex items-center">
-          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-md border border-gray-100 hover:shadow-lg transition-all">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100">
             <img
               src={nyamixLogo}
               alt="NyamiX Logo"
-              className="w-12 h-12 object-contain"
+              className="w-8 h-8 md:w-10 md:h-10 object-contain"
             />
           </div>
+          <span className="text-xl font-bold text-gray-900 md:hidden">NyamiX</span>
         </Link>
+
+       
 
         {/* Navigation */}
         <nav className="hidden md:flex items-center gap-8">
           <Link
             to="/"
-            className="flex items-center gap-2 text-foreground hover:text-primary transition-all hover:scale-105 active:scale-95 font-medium"
+            className="flex items-center gap-2 text-gray-700 hover:text-lime-600 transition-colors font-medium text-sm"
           >
             <Home className="h-4 w-4" />
             Home
@@ -81,7 +85,7 @@ export function Header() {
           {isAuthenticated && (
             <Link
               to="/tickets"
-              className="flex items-center gap-2 text-foreground hover:text-primary transition-all hover:scale-105 active:scale-95 font-medium"
+              className="flex items-center gap-2 text-gray-700 hover:text-lime-600 transition-colors font-medium text-sm"
             >
               <Ticket className="h-4 w-4" />
               My Tickets
@@ -94,10 +98,15 @@ export function Header() {
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={currentUser?.avatar || `https://ui-avatars.com/api/?name=${currentUser?.username || 'User'}`} alt="@user" />
-                    <AvatarFallback>{currentUser?.username ? currentUser.username.charAt(0) : 'U'}</AvatarFallback>
+                <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
+                  <Avatar className="h-9 w-9 border border-gray-200">
+                    <AvatarImage 
+                      src={currentUser?.avatar || defaultAvatarUrl} 
+                      alt={currentUser?.username || 'User'} 
+                    />
+                    <AvatarFallback className="bg-gray-100 text-gray-700">
+                      {currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : 'U'}
+                    </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -111,11 +120,11 @@ export function Header() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
+                <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer text-sm">
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-600">
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-600 text-sm">
                   <LogOut className="mr-2 h-4 w-4" />
                   Log out
                 </DropdownMenuItem>
@@ -127,14 +136,14 @@ export function Header() {
                 variant="outline"
                 size="sm"
                 onClick={() => navigate('/login')}
-                className="border-border/50 hover:bg-primary/10 hover:text-primary transition-all duration-200 rounded-xl"
+                className="border-gray-300 text-gray-700 hover:bg-gray-50 text-sm rounded-lg"
               >
                 Login
               </Button>
               <Button
                 size="sm"
                 onClick={() => navigate('/signup')}
-                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-md text-white font-medium rounded-xl transition-all duration-200"
+                className="bg-lime-600 hover:bg-lime-700 shadow-sm text-white font-medium text-sm rounded-lg"
               >
                 Sign Up
               </Button>
