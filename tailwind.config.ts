@@ -52,6 +52,13 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// NyamiX Custom Colors
+				nyamix: {
+					lime: 'hsl(var(--nyamix-lime))',
+					black: 'hsl(var(--nyamix-black))',
+					grey: 'hsl(var(--nyamix-grey))',
+					'dark-grey': 'hsl(var(--nyamix-dark-grey))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
