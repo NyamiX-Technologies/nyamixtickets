@@ -207,6 +207,8 @@ export function EventDetailsModal({ event, open, onClose, onTicketPurchased }: E
 
   if (!event || !eventDetails) return null;
 
+  const isFormInvalid = !selectedTicketType || !phone.trim() || quantity === 0 || Object.keys(errors).some(k => !!errors[k]);
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[95vh] overflow-hidden p-0 rounded-3xl shadow-2xl border-0 bg-gradient-to-br from-background via-background to-muted/20">
@@ -540,7 +542,7 @@ export function EventDetailsModal({ event, open, onClose, onTicketPurchased }: E
 
                           <Button
                             onClick={handlePurchase}
-                            disabled={isLoading || !selectedTicketType || !phone.trim() || quantity === 0}
+                            disabled={isLoading || isFormInvalid}
                             className="w-full mt-8 h-16 text-xl font-bold rounded-2xl bg-gradient-to-r from-primary via-primary to-primary/80 hover:from-primary/90 hover:via-primary/90 hover:to-primary/70 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
                           >
                             {isLoading ? (

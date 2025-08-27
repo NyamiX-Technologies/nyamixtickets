@@ -5,10 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { CalendarDays, MapPin, Clock, ArrowRight, Ticket } from 'lucide-react';
 import { IMAGE_BASE_URL } from '@/lib/api';
 import { Event, TicketType, Category } from '@/lib/events';
+import { useNavigate } from 'react-router-dom';
 
 interface EventCardProps {
   event: Event;
-  onClick: (event: Event) => void;
 }
 
 // Utility function to format price with K notation
@@ -28,7 +28,8 @@ const getAvailabilityStatus = (ticketTypes: TicketType[]) => {
   return { status: 'available', text: 'Available' };
 };
 
-export function EventCard({ event, onClick }: EventCardProps) {
+export function EventCard({ event }: EventCardProps) {
+  const navigate = useNavigate();
   const eventDate = new Date(event.date);
   
   // Calculate price range from ticket types
@@ -55,6 +56,10 @@ export function EventCard({ event, onClick }: EventCardProps) {
     hour12: true
   });
 
+  const handleClick = () => {
+    navigate(`/events/${event.id}`, { state: { event } });
+  };
+
   return (
     <motion.div
       whileHover={{ y: -4 }}
@@ -65,7 +70,7 @@ export function EventCard({ event, onClick }: EventCardProps) {
     >
       <Card 
         className="overflow-hidden cursor-pointer h-full border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg bg-card"
-        onClick={() => onClick(event)}
+        onClick={handleClick}
       >
         {/* Event Image */}
         <div className="relative h-48 overflow-hidden">
@@ -138,7 +143,7 @@ export function EventCard({ event, onClick }: EventCardProps) {
           <Button
             onClick={(e) => {
               e.stopPropagation();
-              onClick(event);
+              handleClick();
             }}
             className="w-full group/btn"
             disabled={availability.status === 'sold-out'}

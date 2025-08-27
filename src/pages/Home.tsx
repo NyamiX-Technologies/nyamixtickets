@@ -7,6 +7,8 @@ import { Event, Category, eventService, Ticket } from '@/lib/events';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { Ticket as TicketIcon, Sparkles, Calendar, Zap } from 'lucide-react';
+import { authService } from '@/lib/auth';
+import Login from './Login';
 
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -17,13 +19,32 @@ export default function Home() {
   const [userTickets, setUserTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [ticketsLoading, setTicketsLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(authService.isAuthenticated());
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadData();
-    loadUserTickets();
-  }, []);
+    // Check authentication status when component mounts
+    const checkAuth = () => {
+      setIsAuthenticated(authService.isAuthenticated());
+    };
+    
+    // Set up an event listener for auth changes
+    window.addEventListener('storage', checkAuth);
+    
+    // Initial check
+    checkAuth();
+    
+    // Load data if authenticated
+    if (isAuthenticated) {
+      loadData();
+      loadUserTickets();
+    }
+    
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+    };
+  }, [isAuthenticated]);
 
   const loadData = async () => {
     try {
@@ -100,6 +121,15 @@ export default function Home() {
   const handleTicketsNavigation = () => {
     navigate('/tickets');
   };
+
+  // If not authenticated, show the login screen
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen">
+        <Login onLoginSuccess={() => setIsAuthenticated(true)} />
+      </div>
+    );
+  }
 
   if (loading) {
     return (

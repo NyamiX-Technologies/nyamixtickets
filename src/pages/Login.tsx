@@ -10,7 +10,11 @@ import { authService } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import nyamixLogo from '@/assets/nyamix.jpg';
 
-export default function Login() {
+interface LoginProps {
+  onLoginSuccess?: () => void;
+}
+
+export default function Login({ onLoginSuccess }: LoginProps) {
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -43,7 +47,13 @@ export default function Login() {
         description: "You've been logged in successfully",
       });
 
-      navigate('/');
+      // Call the success callback if provided
+      if (onLoginSuccess) {
+        onLoginSuccess();
+      } else {
+        // Default navigation if no callback provided
+        navigate('/');
+      }
     } catch (error: any) {
       console.error('Login failed:', error);
       toast({
