@@ -90,42 +90,39 @@ export default function Login() {
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username" className="text-sm font-medium">Username</Label>
               <Input
-  id="username"
-  type="text"
-  placeholder="Enter your username"
-  value={formData.username}
-  onChange={(e) => handleInputChange('username', e.target.value)}
-  disabled={isLoading}
-  className="w-full border border-gray-300 rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
-/>
-
-
-
+                id="username"
+                type="text"
+                placeholder="Enter your username"
+                value={formData.username}
+                onChange={(e) => handleInputChange('username', e.target.value)}
+                disabled={isLoading}
+                className="h-14 px-4 text-base w-full border border-gray-300 rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
+              />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
               <div className="relative">
-              <Input
-  id="password"
-  type={showPassword ? 'text' : 'password'}
-  placeholder="Enter your password"
-  value={formData.password}
-  onChange={(e) => handleInputChange('password', e.target.value)}
-  disabled={isLoading}
-  className="w-full pr-12 border border-gray-300 rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
-/>
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  disabled={isLoading}
+                  className="h-14 px-4 pr-14 text-base w-full border border-gray-300 rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
+                />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-gray-100"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={isLoading}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </Button>
               </div>
             </div>
@@ -139,16 +136,16 @@ export default function Login() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full nyamix-button-primary flex justify-center items-center gap-2 hover:bg-primary/90 transition-all rounded-[56px]"
+              className="h-14 text-base w-full nyamix-button-primary flex justify-center items-center gap-2 hover:bg-primary/90 transition-all rounded-[56px] font-medium"
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-current border-t-transparent" />
                   Signing in...
                 </div>
               ) : (
                 <>
-                  <LogIn className="h-4 w-4" />
+                  <LogIn className="h-5 w-5" />
                   Sign In
                 </>
               )}

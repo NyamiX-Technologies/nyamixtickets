@@ -129,10 +129,12 @@ export default function Signup() {
           </div>
 
           {/* Signup Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {['email', 'username'].map((field) => (
               <div className="space-y-2" key={field}>
-                <Label htmlFor={field}>{field.charAt(0).toUpperCase() + field.slice(1)}</Label>
+                <Label htmlFor={field} className="text-sm font-medium">
+                  {field.charAt(0).toUpperCase() + field.slice(1)}
+                </Label>
                 <Input
                   id={field}
                   type={field === 'email' ? 'email' : 'text'}
@@ -140,7 +142,7 @@ export default function Signup() {
                   value={(formData as any)[field]}
                   onChange={(e) => handleInputChange(field, e.target.value)}
                   disabled={isLoading}
-                  className="w-full border border-gray-300 rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
+                  className="h-14 px-4 text-base w-full border border-gray-300 rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
                 />
               </div>
             ))}
@@ -152,7 +154,9 @@ export default function Signup() {
 
               return (
                 <div className="space-y-2" key={field}>
-                  <Label htmlFor={field}>{field === 'password' ? 'Password' : 'Confirm Password'}</Label>
+                  <Label htmlFor={field} className="text-sm font-medium">
+                    {field === 'password' ? 'Password' : 'Confirm Password'}
+                  </Label>
                   <div className="relative">
                     <Input
                       id={field}
@@ -161,40 +165,42 @@ export default function Signup() {
                       value={(formData as any)[field]}
                       onChange={(e) => handleInputChange(field, e.target.value)}
                       disabled={isLoading}
-                      className="w-full pr-12 border border-gray-300 rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
+                      className="h-14 px-4 pr-14 text-base w-full border border-gray-300 rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-gray-100"
                       onClick={() => toggle(!show)}
                       disabled={isLoading}
                     >
-                      {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {show ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </Button>
                   </div>
                 </div>
               );
             })}
 
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full nyamix-button-primary flex justify-center items-center gap-2 hover:bg-primary/90 transition-all rounded-[56px]"
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
-                  Creating account...
-                </div>
-              ) : (
-                <>
-                  <UserPlus className="h-4 w-4" />
-                  Create Account
-                </>
-              )}
-            </Button>
+            <div className="pt-2">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="h-14 text-base w-full nyamix-button-primary flex justify-center items-center gap-2 hover:bg-primary/90 transition-all rounded-[56px] font-medium"
+              >
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-current border-t-transparent" />
+                    Creating account...
+                  </div>
+                ) : (
+                  <>
+                    <UserPlus className="h-5 w-5" />
+                    Create Account
+                  </>
+                )}
+              </Button>
+            </div>
           </form>
 
           {/* Login Link */}
