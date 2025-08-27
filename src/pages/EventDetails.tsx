@@ -136,28 +136,27 @@ export default function EventDetails() {
     setQuantity(1);
   }, []);
 
-  // Validate phone number
-  const validatePhone = useCallback((phoneNumber: string): boolean => {
-    const phoneRegex = /^(09[567]\d{7}|077\d{7}|0760\d{6}|26[01]\d{7})$/;
-    return phoneRegex.test(phoneNumber.replace(/\s+/g, ''));
-  }, []);
-  
+  const validateForm = useCallback(() => {
+    const newErrors: Record<string, string> = {};
+   
+    if (!phone.trim()) {
+      newErrors.phone = 'Phone number is required.';
+    } else if (!/^(\+?260|0)[1-9]\d{8}$/.test(phone.trim())) {
+      newErrors.phone = 'Please enter a valid Zambian mobile number.';
+    }
+
+    return newErrors;
+  }, [phone]);
 
   // Handle purchase
   const handlePurchase = useCallback(async () => {
-    if (!event || !selectedTicketType || !phone.trim()) return;
-
-    // Validate inputs
-    const newErrors: Record<string, string> = {};
-    
-    if (!validatePhone(phone)) {
-      newErrors.phone = 'Please enter a valid Zambian mobile number (MTN: 096/097, Airtel: 095/097)';
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
+
+    if (!event || !selectedTicketType) return;
 
     setErrors({});
     setIsProcessingPayment(true);
@@ -215,7 +214,7 @@ export default function EventDetails() {
     } finally {
       setIsProcessingPayment(false);
     }
-  }, [event, selectedTicketType, phone, quantity, isAuthenticated, totalPrice, validatePhone, navigate, toast]);
+  }, [event, selectedTicketType, phone, quantity, isAuthenticated, totalPrice, navigate, toast]);
 
   // Loading state
   if (loading) {
