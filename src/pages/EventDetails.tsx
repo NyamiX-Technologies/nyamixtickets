@@ -138,9 +138,10 @@ export default function EventDetails() {
 
   // Validate phone number
   const validatePhone = useCallback((phoneNumber: string): boolean => {
-    const phoneRegex = /^(09[567]\d{7}|26[01]\d{7})$/;
+    const phoneRegex = /^(09[567]\d{7}|077\d{7}|0760\d{6}|26[01]\d{7})$/;
     return phoneRegex.test(phoneNumber.replace(/\s+/g, ''));
   }, []);
+  
 
   // Handle purchase
   const handlePurchase = useCallback(async () => {
