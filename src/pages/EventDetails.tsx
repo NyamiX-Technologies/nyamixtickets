@@ -138,11 +138,14 @@ export default function EventDetails() {
   const validateForm = useCallback(() => {
     const newErrors: Record<string, string> = {};
       
-      if (!phone.trim()) {
-        newErrors.phone = 'Phone number is required.';
-      } else if (!/^(9[5-7]|7[6-7])\d{8}$/.test(phone.trim())) {
-        newErrors.phone = 'Please enter a valid 10-digit Zambian mobile number.';
-      }
+if (!phone.trim()) {
+  newErrors.phone = 'Phone number is required.';
+} else if (!/^(9[67]|7[67])\d{7}$/.test(phone.trim())) {
+  newErrors.phone = 'Please enter a valid 9-digit Zambian MTN or Airtel number.';
+}
+
+
+
       
       if (!selectedTicketType) {
         newErrors.ticketType = 'Please select a ticket type';
