@@ -6,9 +6,20 @@ import { Button } from '@/components/ui/button';
 import { Event, Category, eventService, Ticket } from '@/lib/events';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { Ticket as TicketIcon, Sparkles, Calendar, Zap } from 'lucide-react';
+import { Ticket as TicketIcon, Sparkles, Calendar, Zap, AlertCircle, User } from 'lucide-react';
 import { authService } from '@/lib/auth';
-import Login from './Login';
+import { Login } from './Login';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { apiClient } from '@/lib/api';
+
+interface UserProfile {
+  id: number;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  birth_date: string | null;
+  avatar: string | null;
+}
 
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -20,13 +31,42 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [ticketsLoading, setTicketsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(authService.isAuthenticated());
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [profileComplete, setProfileComplete] = useState<boolean>(true);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const fetchUserProfile = async () => {
+    if (!isAuthenticated) return;
+    
+    try {
+      const profile = await apiClient.get<UserProfile>('/accounts/profile/');
+      setUserProfile(profile);
+      
+      // Check if profile is complete
+      const isComplete = profile.first_name && profile.last_name && profile.phone;
+      setProfileComplete(!!isComplete);
+      
+      // Store profile in local storage for other components
+      localStorage.setItem('user_profile', JSON.stringify(profile));
+    } catch (error) {
+      console.error('Failed to fetch user profile:', error);
+      // If profile doesn't exist, it's incomplete
+      setProfileComplete(false);
+    }
+  };
 
   useEffect(() => {
     // Check authentication status when component mounts
     const checkAuth = () => {
-      setIsAuthenticated(authService.isAuthenticated());
+      const wasAuthenticated = isAuthenticated;
+      const isNowAuthenticated = authService.isAuthenticated();
+      setIsAuthenticated(isNowAuthenticated);
+      
+      // If user just logged in, fetch their profile
+      if (!wasAuthenticated && isNowAuthenticated) {
+        fetchUserProfile();
+      }
     };
     
     // Set up an event listener for auth changes
@@ -39,6 +79,7 @@ export default function Home() {
     if (isAuthenticated) {
       loadData();
       loadUserTickets();
+      fetchUserProfile();
     }
     
     return () => {
@@ -126,7 +167,10 @@ export default function Home() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen">
-        <Login onLoginSuccess={() => setIsAuthenticated(true)} />
+        <Login onLoginSuccess={() => {
+          setIsAuthenticated(true);
+          fetchUserProfile();
+        }} />
       </div>
     );
   }
@@ -149,6 +193,27 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {!profileComplete && (
+        <Alert className="bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200 mb-6">
+          <AlertCircle className="h-5 w-5" />
+          <AlertTitle>Complete your profile</AlertTitle>
+          <AlertDescription className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              Please update your profile information to ensure event hosts can contact you if needed.
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-yellow-800 border-yellow-300 hover:bg-yellow-100 dark:text-yellow-200 dark:border-yellow-700 dark:hover:bg-yellow-900/50"
+              onClick={() => navigate('/update-profile')}
+            >
+              <User className="h-4 w-4 mr-2" />
+              Update Profile
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <div className="p-6">
         {/* Header */}
         <div className="max-w-6xl mx-auto mb-12">

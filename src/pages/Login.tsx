@@ -14,7 +14,7 @@ interface LoginProps {
   onLoginSuccess?: () => void;
 }
 
-export default function Login({ onLoginSuccess }: LoginProps) {
+export function Login({ onLoginSuccess }: LoginProps) {
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +22,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const username = formData.username.trim();
@@ -40,7 +40,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     setIsLoading(true);
 
     try {
-      await authService.login({ username, password });
+      const response = await authService.login({ username, password });
 
       toast({
         title: "Welcome back!",
