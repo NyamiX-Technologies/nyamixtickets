@@ -86,13 +86,15 @@ export default function Tickets() {
     }
   };
 
-  const renderTicketCard = (ticket: Ticket) => (
+  const renderTicketCard = (ticket: Ticket) => {
+    console.log('Ticket Status:', ticket.payment_status);
+    return (
     <div key={ticket.id} className="bg-card border border-border/50 rounded-[10px] shadow-lg overflow-hidden transition-transform transform hover:scale-[1.02] duration-300">
       <div className="grid grid-cols-1 md:grid-cols-3">
         <div className="md:col-span-1 p-4 md:p-6 flex flex-col justify-center items-center bg-muted/30 border-b md:border-b-0 md:border-r border-border/50">
-          {ticket.payment_status === 'successfull' ? (
+          {ticket.payment_status === 'sucessfull' ? (
             <div className="text-center">
-              <img src={`${ticket.barcode_image}`} alt="Ticket Barcode" className="w-32 h-32 sm:w-40 sm:h-40 object-contain rounded-lg mx-auto" />
+              <img src={`${IMAGE_BASE_URL}${ticket.barcode_image}`} alt="Ticket Barcode" className="w-32 h-32 sm:w-40 sm:h-40 object-contain rounded-lg mx-auto" />
               <p className="text-xs text-muted-foreground mt-2">Scan at event entrance</p>
             </div>
           ) : (
@@ -101,11 +103,13 @@ export default function Tickets() {
               <h3 className="font-bold text-foreground">Payment Required</h3>
               <p className="text-sm text-muted-foreground mb-4">Complete payment to reveal your barcode.</p>
               <Button size="sm" onClick={() => openRetryModal(ticket)} className="w-full">
+                
                 <CreditCard className="h-4 w-4 mr-2" />
                 Pay Now
               </Button>
             </div>
           )}
+          
         </div>
         <div className="md:col-span-2 p-4 md:p-6">
           <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
@@ -127,7 +131,7 @@ export default function Tickets() {
         </div>
       </div>
     </div>
-  );
+  )};
 
   return (
     <div className="min-h-screen bg-background">
