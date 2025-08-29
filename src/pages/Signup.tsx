@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
 import { authService } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
-import nyamixLogo from '@/assets/nyamix.jpg';
+import nyamixLogo from '@/assets/newlogo.jpeg';
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -91,14 +91,14 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-mellow-lime/50 via-gray-100/20 to-white">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <Card className="p-8 rounded-[16px] shadow-lg bg-white/90 backdrop-blur-md">
+        <Card className="p-8 rounded-[16px] shadow-lg bg-card">
           {/* Logo and Title */}
           <div className="text-center mb-8">
             <Link
@@ -131,7 +131,7 @@ export default function Signup() {
                   value={(formData as any)[field]}
                   onChange={(e) => handleInputChange(field, e.target.value)}
                   disabled={isLoading}
-                  className="h-14 px-4 text-base w-full border border-gray-300 rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
+                  className="h-14 px-4 text-base w-full border border-border bg-transparent rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
                 />
               </div>
             ))}
@@ -148,13 +148,13 @@ export default function Signup() {
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
                   disabled={isLoading}
-                  className="h-14 px-4 pr-14 text-base w-full border border-gray-300 rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
+                  className="h-14 px-4 pr-14 text-base w-full border border-border bg-transparent rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-gray-100"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-muted"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={isLoading}
                 >

@@ -6,7 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { authService, User as AuthUser } from '@/lib/auth';
 import { LogOut, User, Home, Ticket, Settings } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import nyamixLogo from '@/assets/nyamix.jpg';
+import nyamixLogo from '@/assets/newlogo.jpeg';
 import { useState, useEffect } from 'react';
 import { ModeToggle } from './ModeToggle';
 
