@@ -62,14 +62,15 @@ export function EventCard({ event }: EventCardProps) {
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -5, scale: 1.01 }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
       className="group h-full"
     >
       <Card 
-        className="overflow-hidden cursor-pointer h-full border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg bg-card"
+        className="overflow-hidden cursor-pointer h-full border border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-xl bg-card flex flex-col"
+        onClick={handleClick}
       >
         {/* Event Image */}
         <div className="relative h-48 overflow-hidden">
@@ -77,10 +78,10 @@ export function EventCard({ event }: EventCardProps) {
             src={`${IMAGE_BASE_URL}${event.image}`}
             alt={event.title}
             loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
           
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
           
           {/* Only Category Badge */}
           <div className="absolute top-3 right-3">
@@ -103,12 +104,12 @@ export function EventCard({ event }: EventCardProps) {
         </div>
 
         {/* Event Content */}
-        <div className="p-5">
+        <div className="p-4 flex flex-col flex-grow">
           {/* Date and Time */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <CalendarDays className="h-4 w-4" />
             <span>{formattedDate}</span>
-            <span>•</span>
+            <span className="text-muted-foreground/50">•</span>
             <Clock className="h-4 w-4" />
             <span>{formattedTime}</span>
           </div>
@@ -124,34 +125,45 @@ export function EventCard({ event }: EventCardProps) {
             <span className="line-clamp-1">{event.location}</span>
           </div>
 
-          {/* Price Range */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Ticket className="h-4 w-4 text-primary" />
-              <span className="font-semibold text-foreground">{priceDisplay}</span>
-            </div>
-            
-            {event.age_restriction && (
-              <Badge variant="outline" className="text-xs">
-                {event.age_restriction}+
-              </Badge>
-            )}
-          </div>
-
-          {/* Action Button */}
-          <Button
-            className="w-full group/btn"
-            disabled={availability.status === 'sold-out'}
-            variant={availability.status === 'sold-out' ? 'secondary' : 'default'}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <Ticket className="h-4 w-4" />
-              {availability.status === 'sold-out' ? 'Sold Out' : 'Get Tickets'}
-              {availability.status !== 'sold-out' && (
-                <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+          <div className="mt-auto">
+            {/* Price Range */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Ticket className="h-5 w-5 text-primary" />
+                <span className="font-bold text-lg text-foreground">{priceDisplay}</span>
+              </div>
+              
+              {event.age_restriction && (
+                <Badge variant="outline" className="text-xs">
+                  {event.age_restriction}+
+                </Badge>
               )}
             </div>
-          </Button>
+
+            {/* Action Button */}
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClick();
+              }}
+              className="w-full group/btn font-semibold"
+              disabled={availability.status === 'sold-out'}
+              variant={availability.status === 'sold-out' ? 'secondary' : 'default'}
+              size="lg"
+            >
+              <div className="flex items-center justify-center gap-2">
+                {availability.status === 'sold-out' ? (
+                  'Sold Out'
+                ) : (
+                  <>
+                    <Ticket className="h-4 w-4" />
+                    <span>Get Tickets</span>
+                    <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover/btn:opacity-100 group-hover/btn:translate-x-0 transition-all duration-300" />
+                  </>
+                )}
+              </div>
+            </Button>
+          </div>
         </div>
       </Card>
     </motion.div>
