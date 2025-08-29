@@ -133,14 +133,14 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-lime-500 mx-auto mb-6"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-border border-t-primary mx-auto mb-6"></div>
           </div>
           <div className="space-y-2">
-            <p className="text-gray-700 font-semibold text-lg">Loading Events</p>
-            <p className="text-gray-500 text-sm">Please wait...</p>
+            <p className="text-foreground font-semibold text-lg">Loading Events</p>
+            <p className="text-muted-foreground text-sm">Please wait...</p>
           </div>
         </div>
       </div>
@@ -148,28 +148,28 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="p-6">
         {/* Header */}
         <div className="max-w-6xl mx-auto mb-12">
           <div className="text-center space-y-6">
-            <h1 className="text-5xl md:text-6xl font-bold mb-4 text-gray-900">
+            <h1 className="text-5xl md:text-6xl font-bold mb-4 text-foreground">
               Discover Events
             </h1>
-            <p className="text-gray-600 text-xl">
+            <p className="text-muted-foreground text-xl">
               Find and book the most amazing experiences
             </p>
             
             {/* Stats */}
             <div className="flex justify-center items-center space-x-8">
               <div className="text-center">
-                <div className="text-2xl font-semibold text-lime-600">{events.length}</div>
-                <div className="text-sm text-gray-500">Events</div>
+                <div className="text-2xl font-semibold text-primary">{events.length}</div>
+                <div className="text-sm text-muted-foreground">Events</div>
               </div>
-              <div className="w-px h-12 bg-gray-200"></div>
+              <div className="w-px h-12 bg-border"></div>
               <div className="text-center">
-                <div className="text-2xl font-semibold text-lime-600">{categories.length}</div>
-                <div className="text-sm text-gray-500">Categories</div>
+                <div className="text-2xl font-semibold text-primary">{categories.length}</div>
+                <div className="text-sm text-muted-foreground">Categories</div>
               </div>
             </div>
           </div>
@@ -182,11 +182,7 @@ export default function Home() {
               variant={selectedCategory === null ? "default" : "outline"}
               size="lg"
               onClick={handleShowAllEvents}
-              className={`rounded-[56px] px-6 py-3 font-medium ${
-                selectedCategory === null 
-                  ? "bg-lime-600 hover:bg-lime-700 text-white" 
-                  : "border-gray-300 text-gray-700 hover:bg-gray-50"
-              }`}
+              className="rounded-full px-6 py-3 font-medium"
             >
               <Sparkles className="w-4 h-4 mr-2" />
               All Events
@@ -198,11 +194,7 @@ export default function Home() {
                 variant={selectedCategory === category.id ? "default" : "outline"}
                 size="lg"
                 onClick={() => loadCategoryEvents(category.id)}
-                className={`rounded-[56px] px-6 py-3 font-medium ${
-                  selectedCategory === category.id
-                    ? "bg-lime-600 hover:bg-lime-700 text-white"
-                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                }`}
+                className="rounded-full px-6 py-3 font-medium"
               >
                 {category.name}
               </Button>
@@ -221,19 +213,18 @@ export default function Home() {
                 >
                   <EventCard
                     event={event}
-                    onClick={handleEventClick}
                   />
                 </div>
               ))}
             </div>
           ) : (
             <div className="text-center py-20">
-              <div className="bg-white rounded-xl p-12 border border-gray-200 shadow-sm max-w-lg mx-auto">
-                <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-                  <Calendar className="w-12 h-12 text-gray-400" />
+              <div className="bg-card rounded-xl p-12 border border-border shadow-sm max-w-lg mx-auto">
+                <div className="w-24 h-24 mx-auto mb-6 bg-secondary rounded-full flex items-center justify-center">
+                  <Calendar className="w-12 h-12 text-muted-foreground" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4 text-gray-900">No Events Found</h3>
-                <p className="text-gray-600 mb-8">
+                <h3 className="text-2xl font-semibold mb-4 text-foreground">No Events Found</h3>
+                <p className="text-muted-foreground mb-8">
                   {selectedCategory 
                     ? "No events available in this category" 
                     : "No events are currently available"
@@ -242,7 +233,7 @@ export default function Home() {
                 {selectedCategory && (
                   <Button 
                     onClick={handleShowAllEvents} 
-                    className="rounded-lg px-6 py-3 bg-lime-600 hover:bg-lime-700 text-white font-medium"
+                    className="rounded-lg px-6 py-3 font-medium"
                   >
                     <Sparkles className="w-4 h-4 mr-2" />
                     View All Events

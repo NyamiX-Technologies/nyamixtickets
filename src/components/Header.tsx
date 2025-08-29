@@ -8,6 +8,7 @@ import { LogOut, User, Home, Ticket, Settings } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import nyamixLogo from '@/assets/nyamix.jpg';
 import { useState, useEffect } from 'react';
+import { ModeToggle } from './ModeToggle';
 
 export function Header() {
   const navigate = useNavigate();
@@ -54,20 +55,20 @@ export function Header() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 80 }}
-      className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white/90 backdrop-blur-sm shadow-sm"
+      className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur-sm"
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         
         {/* Logo Section */}
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100">
+          <div className="w-10 h-10 md:w-12 md:h-12 bg-card rounded-xl flex items-center justify-center shadow-sm border border-border">
             <img
               src={nyamixLogo}
               alt="NyamiX Logo"
               className="w-8 h-8 md:w-10 md:h-10 object-contain"
             />
           </div>
-          <span className="text-xl font-bold text-gray-900 md:hidden">NyamiX</span>
+          <span className="text-xl font-bold text-foreground sm:inline-block hidden">NyamiX</span>
         </Link>
 
        
@@ -76,7 +77,7 @@ export function Header() {
         <nav className="hidden md:flex items-center gap-8">
           <Link
             to="/"
-            className="flex items-center gap-2 text-gray-700 hover:text-lime-600 transition-colors font-medium text-sm"
+            className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors font-medium text-sm"
           >
             <Home className="h-4 w-4" />
             Home
@@ -85,7 +86,7 @@ export function Header() {
           {isAuthenticated && (
             <Link
               to="/tickets"
-              className="flex items-center gap-2 text-gray-700 hover:text-lime-600 transition-colors font-medium text-sm"
+              className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors font-medium text-sm"
             >
               <Ticket className="h-4 w-4" />
               My Tickets
@@ -95,16 +96,17 @@ export function Header() {
 
         {/* Auth Section */}
         <div className="flex items-center gap-3">
+          <ModeToggle />
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
-                  <Avatar className="h-9 w-9 border border-gray-200">
+                  <Avatar className="h-9 w-9 border border-border">
                     <AvatarImage 
                       src={defaultAvatarUrl} 
                       alt={currentUser?.username || 'User'} 
                     />
-                    <AvatarFallback className="bg-gray-100 text-gray-700">
+                    <AvatarFallback className="bg-muted text-muted-foreground">
                       {currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : 'U'}
                     </AvatarFallback>
                   </Avatar>
@@ -136,14 +138,14 @@ export function Header() {
                 variant="outline"
                 size="sm"
                 onClick={() => navigate('/login')}
-                className="border-gray-300 text-gray-700 hover:bg-gray-50 text-sm rounded-lg"
+                className="text-sm rounded-lg"
               >
                 Login
               </Button>
               <Button
                 size="sm"
                 onClick={() => navigate('/signup')}
-                className="bg-lime-600 hover:bg-lime-700 shadow-sm text-white font-medium text-sm rounded-lg"
+                className="bg-primary hover:bg-primary/90 shadow-sm text-primary-foreground font-medium text-sm rounded-lg"
               >
                 Sign Up
               </Button>

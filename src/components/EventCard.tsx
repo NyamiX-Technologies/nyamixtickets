@@ -70,7 +70,6 @@ export function EventCard({ event }: EventCardProps) {
     >
       <Card 
         className="overflow-hidden cursor-pointer h-full border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg bg-card"
-        onClick={handleClick}
       >
         {/* Event Image */}
         <div className="relative h-48 overflow-hidden">
@@ -85,7 +84,7 @@ export function EventCard({ event }: EventCardProps) {
           
           {/* Only Category Badge */}
           <div className="absolute top-3 right-3">
-            <Badge className="bg-white/90 text-gray-800 text-xs px-2 py-1 backdrop-blur-sm">
+            <Badge className="bg-secondary text-secondary-foreground text-xs px-2 py-1 backdrop-blur-sm border border-border/50">
               {event.category.name}
             </Badge>
           </div>
@@ -141,10 +140,6 @@ export function EventCard({ event }: EventCardProps) {
 
           {/* Action Button */}
           <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleClick();
-            }}
             className="w-full group/btn"
             disabled={availability.status === 'sold-out'}
             variant={availability.status === 'sold-out' ? 'secondary' : 'default'}
