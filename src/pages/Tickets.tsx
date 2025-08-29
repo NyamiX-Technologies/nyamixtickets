@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { authService } from '@/lib/auth';
 import { eventService, Ticket } from '@/lib/events';
 import { IMAGE_BASE_URL } from '@/lib/api';
-import { Loader2, Ticket as TicketIcon, AlertCircle, RefreshCw, X, CreditCard, Smartphone, QrCode } from 'lucide-react';
+import { Loader2, Ticket as TicketIcon, AlertCircle, RefreshCw, X, CreditCard, Smartphone, QrCode, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 // Helper to format date
@@ -92,7 +92,13 @@ export default function Tickets() {
     <div key={ticket.id} className="bg-card border border-border/50 rounded-[10px] shadow-lg overflow-hidden transition-transform transform hover:scale-[1.02] duration-300">
       <div className="grid grid-cols-1 md:grid-cols-3">
         <div className="md:col-span-1 p-4 md:p-6 flex flex-col justify-center items-center bg-muted/30 border-b md:border-b-0 md:border-r border-border/50">
-          {ticket.payment_status === 'sucessfull' ? (
+          {ticket.status === 'attended' ? (
+            <div className="text-center p-4 border-2 border-dashed border-green-500/50 rounded-lg bg-green-500/5 w-full">
+              <CheckCircle2 className="h-12 w-12 sm:h-16 sm:h-16 text-green-500/80 mx-auto mb-3" />
+              <h3 className="font-bold text-foreground">Event Attended</h3>
+              <p className="text-sm text-muted-foreground">This ticket has already been used.</p>
+            </div>
+          ) : ticket.payment_status === 'successful' ? (
             <div className="text-center">
               <img src={`${IMAGE_BASE_URL}${ticket.barcode_image}`} alt="Ticket Barcode" className="w-32 h-32 sm:w-40 sm:h-40 object-contain rounded-lg mx-auto" />
               <p className="text-xs text-muted-foreground mt-2">Scan at event entrance</p>
