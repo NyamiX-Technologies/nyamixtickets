@@ -87,17 +87,17 @@ export default function Tickets() {
   };
 
   const renderTicketCard = (ticket: Ticket) => (
-    <div key={ticket.id} className="bg-card border border-border/50 rounded-2xl shadow-lg overflow-hidden transition-transform transform hover:scale-[1.02] duration-300">
+    <div key={ticket.id} className="bg-card border border-border/50 rounded-[10px] shadow-lg overflow-hidden transition-transform transform hover:scale-[1.02] duration-300">
       <div className="grid grid-cols-1 md:grid-cols-3">
-        <div className="md:col-span-1 p-6 flex flex-col justify-center items-center bg-muted/30">
+        <div className="md:col-span-1 p-4 md:p-6 flex flex-col justify-center items-center bg-muted/30 border-b md:border-b-0 md:border-r border-border/50">
           {ticket.payment_status === 'successful' ? (
             <div className="text-center">
-              <img src={`${ticket.barcode_image}`} alt="Ticket Barcode" className="w-40 h-40 object-contain rounded-lg" />
+              <img src={`${ticket.barcode_image}`} alt="Ticket Barcode" className="w-32 h-32 sm:w-40 sm:h-40 object-contain rounded-lg mx-auto" />
               <p className="text-xs text-muted-foreground mt-2">Scan at event entrance</p>
             </div>
           ) : (
-            <div className="text-center p-4 border-2 border-dashed border-yellow-500/50 rounded-lg bg-yellow-500/5">
-              <QrCode className="h-16 w-16 text-yellow-500/80 mx-auto mb-3" />
+            <div className="text-center p-4 border-2 border-dashed border-yellow-500/50 rounded-lg bg-yellow-500/5 w-full">
+              <QrCode className="h-12 w-12 sm:h-16 sm:h-16 text-yellow-500/80 mx-auto mb-3" />
               <h3 className="font-bold text-foreground">Payment Required</h3>
               <p className="text-sm text-muted-foreground mb-4">Complete payment to reveal your barcode.</p>
               <Button size="sm" onClick={() => openRetryModal(ticket)} className="w-full">
@@ -107,14 +107,14 @@ export default function Tickets() {
             </div>
           )}
         </div>
-        <div className="md:col-span-2 p-6">
-          <div className="flex justify-between items-start">
-            <div>
+        <div className="md:col-span-2 p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
+            <div className="flex-grow">
               <p className="text-sm font-medium text-primary">{ticket.ticket_type_name}</p>
-              <h2 className="text-xl font-bold text-foreground mt-1">{ticket.event_title}</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-foreground mt-1">{ticket.event_title}</h2>
             </div>
-            <div className="text-right">
-              <p className="text-lg font-bold">K{ticket.total_price.toFixed(2)}</p>
+            <div className="text-left sm:text-right mt-2 sm:mt-0 flex-shrink-0">
+              <p className="text-base sm:text-lg font-bold">K{ticket.total_price.toFixed(2)}</p>
               <p className="text-xs text-muted-foreground">Qty: {ticket.quantity}</p>
             </div>
           </div>
@@ -131,9 +131,9 @@ export default function Tickets() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-foreground">My Tickets</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">My Tickets</h1>
           <Button variant="outline" onClick={loadUserTickets} disabled={isLoading}>
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             <span className="ml-2 hidden sm:inline">Refresh</span>
