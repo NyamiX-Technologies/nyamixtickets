@@ -45,7 +45,7 @@ export interface Ticket {
   ticket_type_name: string;
   ticket_price: string; 
   total_price: number;
-  payment_status: 'pending' | 'successful' | 'failed' | 'Payment not processed' | string;
+  payment_status: 'pending' | 'successful' | 'failed' | 'Payment not processed' | 'pay-offline' | string;
   event_image: string;
   event_date: string;
   event_description: string;

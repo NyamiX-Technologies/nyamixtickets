@@ -72,7 +72,7 @@ export default function EventDetails() {
   const [event, setEvent] = useState<Event | null>(location.state?.event || null);
   const [loading, setLoading] = useState(!location.state?.event);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTicketType, setSelectedTicketType] = useState<string>('');
+  const [selectedTicketType, setSelectedTicketType] = useState<TicketType | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [phone, setPhone] = useState('');
   const [isPurchasing, setIsPurchasing] = useState(false);
@@ -95,7 +95,7 @@ export default function EventDetails() {
         if (foundEvent) {
           setEvent(foundEvent);
           if (foundEvent.ticket_types?.length > 0) {
-            setSelectedTicketType(foundEvent.ticket_types[0].id.toString());
+            setSelectedTicketType(foundEvent.ticket_types[0]);
           }
         } else {
           throw new Error('Event not found');
@@ -113,40 +113,43 @@ export default function EventDetails() {
 
   // Calculate total price
   const totalPrice = useCallback(() => {
-    if (!selectedTicketType || !event) return 0;
-    const ticket = event.ticket_types.find(t => t.id.toString() === selectedTicketType);
-    return ticket ? Number(ticket.price) * quantity : 0;
-  }, [selectedTicketType, quantity, event]);
+    if (!selectedTicketType) return 0;
+    return Number(selectedTicketType.price) * quantity;
+  }, [selectedTicketType, quantity]);
 
   // Handle quantity change
   const handleQuantityChange = useCallback((increment: boolean) => {
     setQuantity(prev => {
       if (increment) {
-        const ticket = event?.ticket_types.find(t => t.id.toString() === selectedTicketType);
-        return Math.min(prev + 1, ticket?.quantity_available || 10, 10);
+        return Math.min(prev + 1, selectedTicketType?.quantity_available || 10, 10);
       } else {
         return Math.max(prev - 1, 1);
       }
     });
-  }, [selectedTicketType, event]);
+  }, [selectedTicketType]);
 
   // Handle ticket type change
   const handleTicketTypeChange = useCallback((value: string) => {
-    setSelectedTicketType(value);
+    const ticket = event?.ticket_types.find(t => t.id.toString() === value);
+    setSelectedTicketType(ticket || null);
     setQuantity(1);
-  }, []);
+  }, [event]);
 
   const validateForm = useCallback(() => {
     const newErrors: Record<string, string> = {};
-   
-    if (!phone.trim()) {
-      newErrors.phone = 'Phone number is required.';
-    } else if (!/^(\+?260|0)[1-9]\d{8}$/.test(phone.trim())) {
-      newErrors.phone = 'Please enter a valid Zambian mobile number.';
-    }
+      
+      if (!phone.trim()) {
+        newErrors.phone = 'Phone number is required.';
+      } else if (!/^(9[5-7]|7[6-7])\d{8}$/.test(phone.trim())) {
+        newErrors.phone = 'Please enter a valid 10-digit Zambian mobile number.';
+      }
+      
+      if (!selectedTicketType) {
+        newErrors.ticketType = 'Please select a ticket type';
+      }
 
     return newErrors;
-  }, [phone]);
+  }, [phone, selectedTicketType]);
 
   // Handle purchase
   const handlePurchase = useCallback(async () => {
@@ -164,25 +167,19 @@ export default function EventDetails() {
 
     try {
       // Check authentication first
-      if (!isAuthenticated) {
-        // Store purchase data for after login
-        sessionStorage.setItem('pendingPurchase', JSON.stringify({
-          eventId: event.id,
-          ticketTypeId: selectedTicketType,
-          quantity,
-          phone,
-          total: totalPrice()
-        }));
-        navigate('/login');
-        return;
-      }
+     
+
+      //
+       const ticketResult = await eventService.purchaseTicket(
+        selectedTicketType.id.toString(),
+        quantity
+      );
 
       // Process payment
       const paymentData = {
         phone: phone.startsWith('0') ? `+260${phone.substring(1)}` : phone,
         amount: totalPrice(),
-        ticketId: selectedTicketType,
-        quantity
+        ticketId: ticketResult.id,  
       };
 
       // Initiate payment
@@ -201,6 +198,7 @@ export default function EventDetails() {
         setPaymentStatus('idle');
         setPhone('');
         setQuantity(1);
+        navigate('/tickets');
       }, 3000);
 
     } catch (error) {
@@ -214,7 +212,7 @@ export default function EventDetails() {
     } finally {
       setIsProcessingPayment(false);
     }
-  }, [event, selectedTicketType, phone, quantity, isAuthenticated, totalPrice, navigate, toast]);
+  }, [event, selectedTicketType, phone, quantity, isAuthenticated, totalPrice, navigate, toast, validateForm]);
 
   // Loading state
   if (loading) {
@@ -253,8 +251,7 @@ export default function EventDetails() {
     hour12: true
   });
 
-  const selectedTicket = event.ticket_types.find(t => t.id.toString() === selectedTicketType);
-  const maxQuantity = selectedTicket?.quantity_available || 0;
+  const maxQuantity = selectedTicketType?.quantity_available || 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -367,7 +364,7 @@ export default function EventDetails() {
                     Select Ticket Type
                   </Label>
                   <Select 
-                    value={selectedTicketType} 
+                    value={selectedTicketType?.id.toString() || ''} 
                     onValueChange={handleTicketTypeChange}
                     disabled={isProcessingPayment}
                   >
@@ -404,7 +401,7 @@ export default function EventDetails() {
                 </div>
 
                 {/* Quantity Selector */}
-                {selectedTicket && selectedTicket.quantity_available > 0 && (
+                {selectedTicketType && selectedTicketType.quantity_available > 0 && (
                   <div className="space-y-2">
                     <Label htmlFor="quantity" className="text-lg font-semibold flex items-center gap-2">
                       <Users className="h-5 w-5" />
@@ -473,13 +470,13 @@ export default function EventDetails() {
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Ticket Type:</span>
                       <span className="font-medium text-right">
-                        {selectedTicket ? selectedTicket.name : 'Not selected'}
+                        {selectedTicketType ? selectedTicketType.name : 'Not selected'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Price per ticket:</span>
                       <span className="font-medium">
-                        {selectedTicket ? `K${parseFloat(selectedTicket.price).toFixed(2)}` : 'K0.00'}
+                        {selectedTicketType ? `K${parseFloat(selectedTicketType.price).toFixed(2)}` : 'K0.00'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
@@ -499,9 +496,9 @@ export default function EventDetails() {
                 {/* Purchase Button */}
                 <Button
                   onClick={handlePurchase}
-                  disabled={!selectedTicket || !phone.trim() || isProcessingPayment || maxQuantity === 0}
+                  disabled={!selectedTicketType || !phone.trim() || isProcessingPayment || maxQuantity === 0}
                   className={`w-full h-14 text-lg font-bold rounded-2xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] ${
-                    !selectedTicket || !phone.trim() || maxQuantity === 0 ? 'opacity-70 cursor-not-allowed' : ''
+                    !selectedTicketType || !phone.trim() || maxQuantity === 0 ? 'opacity-70 cursor-not-allowed' : ''
                   }`}
                   size="lg"
                 >
