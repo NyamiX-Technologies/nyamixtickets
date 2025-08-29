@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { authService } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
-import nyamixLogo from '@/assets/newlogo.jpeg';
+import nyamixLogo from '@/assets/logo.png';
 
 interface LoginProps {
   onLoginSuccess?: () => void;

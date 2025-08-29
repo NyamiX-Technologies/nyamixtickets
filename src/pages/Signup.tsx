@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
 import { authService } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
-import nyamixLogo from '@/assets/newlogo.jpeg';
+import nyamixLogo from '@/assets/logo.png';
 
 export default function Signup() {
   const [formData, setFormData] = useState({
