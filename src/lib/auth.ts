@@ -25,7 +25,7 @@ export interface AuthResponse {
 export const authService = {
   async login(data: LoginData): Promise<AuthResponse> {
     const response = await apiClient.post<AuthResponse>(
-      `/auth/token/login/${API_VERSION}`,
+      `/auth/token/login/`,
       data
     );
 
@@ -63,7 +63,7 @@ export const authService = {
   },
 
   async getMe(): Promise<User> {
-    const response = await apiClient.get<User>(`/auth/users/me/${API_VERSION}`);
+    const response = await apiClient.get<User>(`/auth/users/me/`);
     return response;
   }
 };
