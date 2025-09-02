@@ -26,29 +26,17 @@ export default function Signup() {
     const { email, username, password } = formData;
 
     if (!email.trim() || !username.trim() || !password.trim()) {
-      toast({
-        title: "Missing information",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
+      toast({ title: "Missing information", description: "Please fill in all fields", variant: "destructive" });
       return false;
     }
 
     if (!email.includes('@')) {
-      toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address",
-        variant: "destructive",
-      });
+      toast({ title: "Invalid email", description: "Please enter a valid email address", variant: "destructive" });
       return false;
     }
 
     if (password.length < 6) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters long",
-        variant: "destructive",
-      });
+      toast({ title: "Password too short", description: "Password must be at least 6 characters long", variant: "destructive" });
       return false;
     }
 
@@ -68,19 +56,20 @@ export default function Signup() {
         password: formData.password
       });
 
-      toast({
-        title: "Account created successfully!",
-        description: "Please log in with your new account",
-      });
-
+      toast({ title: "Account created successfully!", description: "Please log in with your new account" });
       navigate('/login');
     } catch (error: any) {
       console.error('Signup failed:', error);
-      toast({
-        title: "Signup failed",
-        description: error?.message || "Please try again",
-        variant: "destructive",
-      });
+
+      if (error.password) {
+        toast({ title: "Invalid Password", description: error.password[0], variant: "destructive" });
+      } else if (error.username) {
+        toast({ title: "Invalid Username", description: error.username[0], variant: "destructive" });
+      } else if (error.non_field_errors) {
+        toast({ title: "Signup Error", description: error.non_field_errors[0], variant: "destructive" });
+      } else {
+        toast({ title: "Signup failed", description: "An error occurred, please check your input.", variant: "destructive" });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -92,76 +81,63 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
         <Card className="p-8 rounded-[16px] shadow-lg bg-card">
-          {/* Logo and Title */}
           <div className="text-center mb-8">
-            <Link
-              to="/"
-              className="flex items-center justify-center mb-4 transform hover:scale-105 transition-all duration-300"
-            >
-              <img
-                src={nyamixLogo}
-                alt="NyamiX Logo"
-                className="w-20 h-20 object-contain"
-              />
+            <Link to="/" className="flex items-center justify-center mb-4 transform hover:scale-105 transition-all duration-300">
+              <img src={nyamixLogo} alt="NyamiX Logo" className="w-20 h-20 object-contain" />
             </Link>
             <h1 className="text-3xl font-bold text-foreground">Join NyamiX</h1>
-            <p className="text-muted-foreground mt-2">
-              Create your account to start booking tickets
-            </p>
+            <p className="text-muted-foreground mt-2">Create your account to start booking tickets</p>
           </div>
 
-          {/* Signup Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
-            {['email', 'username'].map((field) => (
+            {['email', 'username'].map(field => (
               <div className="space-y-2" key={field}>
-                <Label htmlFor={field} className="text-sm font-medium">
-                  {field.charAt(0).toUpperCase() + field.slice(1)}
-                </Label>
+                <Label htmlFor={field} className="text-sm font-medium">{field.charAt(0).toUpperCase() + field.slice(1)}</Label>
                 <Input
                   id={field}
                   type={field === 'email' ? 'email' : 'text'}
                   placeholder={`Enter your ${field}`}
                   value={(formData as any)[field]}
-                  onChange={(e) => handleInputChange(field, e.target.value)}
+                  onChange={e => handleInputChange(field, e.target.value)}
                   disabled={isLoading}
                   className="h-14 px-4 text-base w-full border border-border bg-transparent rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
                 />
               </div>
             ))}
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
-                Password
-              </Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Create a password"
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  disabled={isLoading}
-                  className="h-14 px-4 pr-14 text-base w-full border border-border bg-transparent rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-muted"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={isLoading}
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </Button>
-              </div>
-            </div>
+<div className="space-y-2">
+  <Label htmlFor="password" className="text-sm font-medium">
+    Password
+  </Label>
+  <div className="relative">
+    <Input
+      id="password"
+      type={showPassword ? 'text' : 'password'}
+      placeholder="Create a password"
+      value={formData.password}
+      onChange={e => handleInputChange('password', e.target.value)}
+      disabled={isLoading}
+      className="h-14 px-4 pr-14 text-base w-full border border-border bg-transparent rounded-[56px] focus:border-primary focus:ring focus:ring-primary/20 transition-all"
+    />
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-muted"
+      onClick={() => setShowPassword(!showPassword)}
+      disabled={isLoading}
+    >
+      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+    </Button>
+  </div>
+
+  {/* Password Hint */}
+  <p className="text-xs text-muted-foreground mt-1">
+    Must be at least <span className="font-medium text-foreground">8 characters</span> and include a <span className="font-medium text-foreground">special character</span>.
+  </p>
+</div>
 
             <div className="pt-2">
               <Button
@@ -184,16 +160,10 @@ export default function Signup() {
             </div>
           </form>
 
-          {/* Login Link */}
           <div className="text-center mt-6">
             <p className="text-muted-foreground">
               Already have an account?{' '}
-              <Link 
-                to="/login" 
-                className="text-primary hover:underline font-medium"
-              >
-                Sign in here
-              </Link>
+              <Link to="/login" className="text-primary hover:underline font-medium">Sign in here</Link>
             </p>
           </div>
         </Card>

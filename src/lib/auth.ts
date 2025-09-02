@@ -28,20 +28,18 @@ export const authService = {
       `/auth/token/login/${API_VERSION}`,
       data
     );
-    
-    // Store token in localStorage
+
     localStorage.setItem('auth_token', response.auth_token);
     localStorage.setItem('user', JSON.stringify(response.user));
-    
+
     return response;
   },
 
   async signup(data: SignupData): Promise<User> {
     const response = await apiClient.post<User>(
-      `/auth/users/${API_VERSION}`,
+      `/auth/users/`,
       data
     );
-    
     return response;
   },
 
@@ -54,10 +52,9 @@ export const authService = {
     return !!localStorage.getItem('auth_token');
   },
 
-  async getCurrentUser(): Promise<User> {
+  async getCurrentUser(): Promise<User | null> {
     const userStr = localStorage.getItem('user');
     if (!userStr) return null;
-    
     try {
       return JSON.parse(userStr);
     } catch {
@@ -66,6 +63,7 @@ export const authService = {
   },
 
   async getMe(): Promise<User> {
-    return apiClient.get<User>(`/auth/users/me/${API_VERSION}`);
+    const response = await apiClient.get<User>(`/auth/users/me/${API_VERSION}`);
+    return response;
   }
 };

@@ -1,155 +1,78 @@
-const API_BASE_URL = 'https://nyamix.up.railway.app/api/v1.0';
-const IMAGE_BASE_URL = 'https://res.cloudinary.com/dqlnpyxr4/';
-const API_VERSION = '?version=v1';
+import axios, { AxiosInstance, AxiosError } from 'axios';
 
-interface ApiError {
-  message: string;
+export const API_BASE_URL = 'https://nyamix.up.railway.app/api/v1.0';
+export const IMAGE_BASE_URL = 'https://res.cloudinary.com/dqlnpyxr4/';
+export const API_VERSION = '?version=v1.0';
+
+export interface ApiError {
+  [key: string]: string[] | string | number;
+  message?: string;
   status?: number;
 }
 
-interface FetchOptions extends RequestInit {
-  timeout?: number;
-}
-
-class ApiClient {
-  private baseURL: string;
-  private defaultTimeout: number;
+export class ApiClient {
+  private axiosInstance: AxiosInstance;
 
   constructor(baseURL: string, timeout = 20000) {
-    this.baseURL = baseURL;
-    this.defaultTimeout = timeout;
-  }
+    this.axiosInstance = axios.create({
+      baseURL,
+      timeout,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
 
-  private getAuthToken(): string | null {
-    return localStorage.getItem('auth_token');
-  }
+    // ✅ Attach token automatically if exists
+    this.axiosInstance.interceptors.request.use((config) => {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        // Ensure config.headers is an AxiosHeaders instance.
+        // If it's undefined, initialize it. Otherwise, use the existing one.
+        config.headers = config.headers || new axios.AxiosHeaders();
+        // Set the Authorization header using the type-safe 'set' method.
+        config.headers.set('Authorization', `Token ${token}`);
+      }
+      return config;
+    });
 
-  private getAuthHeaders(isFormData = false): Record<string, string> {
-    const token = this.getAuthToken();
-    const headers: Record<string, string> = {
-      Accept: 'application/json',
-    };
-
-    if (!isFormData) {
-      headers['Content-Type'] = 'application/json';
-    }
-
-    if (token) {
-      headers.Authorization = `Token ${token}`;
-    }
-
-    return headers;
-  }
-
-  private async fetchWithTimeout(url: string, options: FetchOptions = {}): Promise<Response> {
-    const { timeout = this.defaultTimeout, ...fetchOptions } = options;
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-    try {
-      const response = await fetch(url, {
-        ...fetchOptions,
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        let errorMessage;
-
-        try {
-          const parsedError = JSON.parse(errorData);
-          errorMessage = parsedError.message || parsedError.detail || 'An error occurred';
-        } catch {
-          errorMessage = errorData || `HTTP ${response.status}`;
+    // ✅ Handle errors globally
+    this.axiosInstance.interceptors.response.use(
+      (response) => response,
+      (error: AxiosError) => {
+        if (error.response && error.response.data) {
+          return Promise.reject(error.response.data);
         }
-
-        throw new Error(errorMessage);
+        return Promise.reject({ detail: error.message || 'Network Error' });
       }
-
-      return response;
-    } catch (error) {
-      clearTimeout(timeoutId);
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error('Request timeout - please try again');
-      }
-      throw error;
-    }
+    );
   }
 
-  private async parseResponse<T>(response: Response): Promise<T | string | null> {
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      return response.json() as Promise<T>;
-    } else if (contentType && contentType.includes('text/')) {
-      return response.text() as unknown as T;
-    }
-    return null;
+  async get<T>(url: string) {
+    const response = await this.axiosInstance.get<T>(url);
+    return response.data;
   }
 
-  async get<T>(endpoint: string, options?: FetchOptions): Promise<T | string | null> {
-    const url = `${this.baseURL}${endpoint}`;
-    const response = await this.fetchWithTimeout(url, {
-      method: 'GET',
-      headers: this.getAuthHeaders(),
-      ...options,
-    });
-
-    return this.parseResponse<T>(response);
+  async post<T>(url: string, data?: unknown) {
+    const response = await this.axiosInstance.post<T>(url, data);
+    return response.data;
   }
 
-  async post<T>(endpoint: string, data?: unknown, options?: FetchOptions): Promise<T | string | null> {
-    const url = `${this.baseURL}${endpoint}`;
-    const response = await this.fetchWithTimeout(url, {
-      method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
-      headers: this.getAuthHeaders(),
-      ...options,
-    });
-
-    return this.parseResponse<T>(response);
+  async put<T>(url: string, data?: unknown) {
+    const response = await this.axiosInstance.put<T>(url, data);
+    return response.data;
   }
 
-  async put<T>(endpoint: string, data?: unknown, options?: FetchOptions): Promise<T | string | null> {
-    const url = `${this.baseURL}${endpoint}`;
-    const response = await this.fetchWithTimeout(url, {
-      method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined,
-      headers: this.getAuthHeaders(),
-      ...options,
-    });
-
-    return this.parseResponse<T>(response);
+  async patch<T>(url: string, data?: unknown) {
+    const response = await this.axiosInstance.patch<T>(url, data);
+    return response.data;
   }
 
-  async patch<T>(endpoint: string, body: any, options?: FetchOptions): Promise<T | string | null> {
-    const url = `${this.baseURL}${endpoint}`;
-    const isFormData = body instanceof FormData;
-
-    const response = await this.fetchWithTimeout(url, {
-      method: 'PATCH',
-      body: isFormData ? body : JSON.stringify(body),
-      headers: this.getAuthHeaders(isFormData),
-      ...options,
-    });
-
-    return this.parseResponse<T>(response);
-  }
-
-  async delete<T>(endpoint: string, options?: FetchOptions): Promise<T | string | null> {
-    const url = `${this.baseURL}${endpoint}`;
-    const response = await this.fetchWithTimeout(url, {
-      method: 'DELETE',
-      headers: this.getAuthHeaders(),
-      ...options,
-    });
-
-    return this.parseResponse<T>(response);
+  async delete<T>(url: string) {
+    const response = await this.axiosInstance.delete<T>(url);
+    return response.data;
   }
 }
 
+// ✅ Export a ready-to-use instance
 export const apiClient = new ApiClient(API_BASE_URL);
-export { API_BASE_URL, IMAGE_BASE_URL, API_VERSION };
-export type { ApiError };
